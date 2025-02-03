@@ -1,4 +1,5 @@
 import * as bookingModel from "../models/bookingModel.js";
+import jwt from "jsonwebtoken";
 
 export const getBooking = async (req,res) => {
     try{
@@ -6,7 +7,7 @@ export const getBooking = async (req,res) => {
         return res.status(200).json({
             success: true,
             data: info,
-            massage: 'Send BookingInfo successfully'
+            massage: 'Send Booking Info successfully'
         });
     }
     catch(error){
@@ -20,7 +21,7 @@ export const getBooking = async (req,res) => {
 
 export const createBooking = async (req,res) => {
     const bookingdata = req.body
-    
+
     if(isOverlapping(bookingdata,info)){
         return res.status(500).json({
             success: false,
@@ -29,8 +30,18 @@ export const createBooking = async (req,res) => {
         });
     }
 
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+
+
     try{
-        const data = await bookingModel.createBookingInfo(bookingdata);
+        const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decodedCookie.id;
+
+        const data = await bookingModel.createBookingInfo(bookingdata,userId);
         return res.status(200).json({
             success: true,
             data: data,
@@ -41,7 +52,7 @@ export const createBooking = async (req,res) => {
     console.error("Error:", error);
     return res.status(500).json({
       success: false,
-      data: null,
+      why: error,
       message: "Internal server error"
     })
 }}
