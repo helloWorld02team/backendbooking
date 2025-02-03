@@ -40,11 +40,11 @@ export const loginUser = async (req, res) => {
     try {
         const user = await userModels.getUserByEmail(userEmail); //check for existing email=>user
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password1' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         if (user.UserPassword !== userPassword) {
-            return res.status(401).json({ message: 'Invalid email or password2' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const token = jwt.sign({
