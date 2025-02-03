@@ -1,6 +1,8 @@
 import * as userModels from '../models/userModels.js'
-import jwt from 'jsonwebtoken';
 import * as cookeAuthen from '../utils/cookieAuthen.js'
+import jwt from 'jsonwebtoken';
+import { check, validationResult } from 'express-validator';
+
 
 export const getUser = async (req,res) =>{
     try{
@@ -75,7 +77,9 @@ export const logoutUser =(req,res)=>{
             message:'You are not currently logged in',
         })
     }
+    const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
     res.clearCookie('token');
+    console.log(decodedCookie.email,"has logged out")
     return res.status(200).json({
         message:'logout successfully'
     })

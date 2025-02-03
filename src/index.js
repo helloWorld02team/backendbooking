@@ -3,6 +3,7 @@ import connectDB from "./utils/connectDatabase.js";
 import userRoutes from './routes/userRoutes.js'
 import cookieParser from 'cookie-parser';
 
+
 const app = express();
 const port = 3001;
 await connectDB()
