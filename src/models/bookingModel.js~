@@ -8,8 +8,8 @@ export const getBookingInfo = async () =>{
     return info
 }
 
-export const createBookingInfo = async (details,userId) =>{ await db.promise().query(
-        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.timein,details.timeout,details.room,userId]
+export const createBookingInfo = async (details) =>{ await db.promise().query(
+        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.timein,details.timeout,details.room,details.userid]
     );
     return details
 }
