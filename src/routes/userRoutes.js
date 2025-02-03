@@ -12,4 +12,5 @@ userRoutes.get('/protected', userControllers.someProtectedRoute);
 
 userRoutes.post("/logout",userControllers.logoutUser);
 
+
 export default userRoutes
