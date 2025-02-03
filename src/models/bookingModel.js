@@ -17,11 +17,18 @@ export const createBookingInfo = async (details,userId) =>{ await db.promise().q
     return details
 }
 
-export const checkBookingInfo = async (details) =>{const [checkResult] =
-    await db.promise().query(
+export const checkBookingInfo = async (details) => {
+    const [checkResult] = await db.promise().query(
         `SELECT EXISTS(
-        SELECT 1 FROM Booking WHERE Room_idRoom = ? and
-        BookingTimeIn = ? and BookingTimeOut = ?
-        ) as checkResult`,[details.room,details.timein,details.timeout]
-    );return checkResult
+            SELECT 1 FROM Booking
+            WHERE Room_idRoom = ?
+              AND (
+                (BookingTimeIn < ? AND BookingTimeOut > ?) OR
+                (BookingTimeIn < ? AND BookingTimeOut > ?) OR
+                (BookingTimeIn >= ? AND BookingTimeOut <= ?)
+                )
+        ) as checkResult;`,
+        [details.room, details.timein, details.timein, details.timeout, details.timeout, details.timein, details.timeout]
+    );
+    return checkResult[0];
 }

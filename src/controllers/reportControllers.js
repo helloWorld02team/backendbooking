@@ -17,6 +17,6 @@ export const createReport = async (req,res) => {
     return res.status(500).json({
       success: false,
       data: null,
-      message: "Internal server error"
+      message: error.sqlMessage
     })
 }}
