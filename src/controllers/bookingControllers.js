@@ -22,20 +22,19 @@ export const getBooking = async (req,res) => {
 export const createBooking = async (req,res) => {
     const bookingdata = req.body
 
-    if(isOverlapping(bookingdata,info)){
-        return res.status(500).json({
-            success: false,
-            data: false,
-            message: "Already have this Booking"
-        });
-    }
-
     const token = req.cookies.token;
 
     if (!token) {
         return res.status(401).json({ message: 'No token provided' });
     }
 
+    if( check.checkResult == true || 1){
+        return res.status(500).json({
+            success: false,
+            data: false,
+            message: "Already have this Booking"
+        });
+    }
 
     try{
         const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
