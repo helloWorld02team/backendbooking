@@ -2,7 +2,7 @@ import db from '../configs/database.js'
 //เอาแค่ bookingname, start, end
 export const getBookingInfo = async () =>{
     const [info] = await db.promise().query(
-        `SELECT b.User_idUser, concat(u.UserFname," ",u.UserLname) as Username, b.BookingName, b.Room_idRoom, b.BookingTimeIn, b.BookingTimeOut, b.BookingDuration
+        `SELECT b.idBooking,b.User_idUser, concat(u.UserFname," ",u.UserLname) as Username, b.BookingName, b.Room_idRoom, b.BookingTimeIn, b.BookingTimeOut, b.BookingDuration
         FROM Booking as b join User as u on b.User_idUser = u.idUser`
 
     );
@@ -31,4 +31,16 @@ export const checkBookingInfo = async (details) => {
         [details.room, details.timein, details.timein, details.timeout, details.timeout, details.timein, details.timeout]
     );
     return checkResult[0];
+}
+
+export const selectCheckBeforeDelete = async (details,userId) => { 
+    const [selectcheck] =
+    await db.promise().query( `select * from Booking where idBooking = ? and User_idUser = ?;`,[details.idBooking,userId]
+);
+return selectcheck
+}
+
+export const removeBookingInfo = async (details,userId) =>{ await db.promise().query(
+    `DELETE FROM Booking WHERE idBooking = ? and User_idUser = ?`,[details.idBooking,userId]
+);
 }
