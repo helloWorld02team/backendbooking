@@ -19,8 +19,15 @@ export const getBooking = async (req,res) => {
 };
 
 export const createBooking = async (req,res) => {
-
     const bookingdata = req.body
+    
+    if(isOverlapping(bookingdata,info)){
+        return res.status(500).json({
+            success: false,
+            data: false,
+            message: "Already have this Booking"
+        });
+    }
 
     try{
         const data = await bookingModel.createBookingInfo(bookingdata);
