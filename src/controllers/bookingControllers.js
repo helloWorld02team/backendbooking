@@ -4,13 +4,26 @@ import jwt from "jsonwebtoken";
 export const getBooking = async (req,res) => {
     try{
         const info = await bookingModel.getBookingInfo();
+
+        const infoFormat = info.map(element => ({
+            ...element,
+            BookingTimeIn: new Date(element.BookingTimeIn).toISOString().replace('T', ' ').replace('.000Z', ''),
+            BookingTimeOut: new Date(element.BookingTimeOut).toISOString().replace('T', ' ').replace('.000Z', '')
+            // console.log(typeof element.BookingTimeIn.toISOString());
+            // console.log(element.BookingTimeIn.toISOString());
+        }));
+        
+        // element.BookingTimeIn.toISOString().slice(0, element.BookingTimeIn.indexOf('T'));
+        // element.BookingTimeOut.toISOString().slice(0, element.BookingTimeOut.indexOf('T'));
+
         return res.status(200).json({
             success: true,
-            data: info,
+            data: infoFormat,
             massage: 'Send Booking Info successfully'
         });
     }
     catch(error){
+        console.log(error);
         return res.status(500).json({
             success: false,
             data: null,
@@ -86,6 +99,46 @@ export const deleteBooking = async (req,res) => {
                     success: false,
                     why: "User dont have a permission to delete",
                     message: "User access failure" 
+                })}
+    catch(error){
+        console.error("Error:", error);
+        return res.status(500).json({
+          success: false,
+          why: error,
+          message: "Internal server error"
+    })
+}}
+
+export const UpdateBooking = async (req,res) => {
+    const bookingdata = req.body
+    const token = req.cookies.token;
+
+        
+    
+
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    } 
+
+    try{
+
+        const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decodedCookie.id;
+
+        const checkResult = await bookingModel.checkBookingInfo(bookingdata)
+                if(!checkResult){
+                    const data = await bookingModel.updateBookingInfo(bookingdata,userId);
+                    return res.status(200).json({
+                        success: true,
+                        data: data,
+                        massage: 'Update BookingInfo successfully'
+                    }); 
+                }
+                return res.status(500).json({
+                    success: false,
+                    why: "มึงอัพวันซ้ำกับคนอื่นครับ",
+                    message: "User มึงอัพไม่ได้ไอควาย" 
                 })}
     catch(error){
         console.error("Error:", error);
