@@ -60,10 +60,6 @@ export const deleteBooking = async (req,res) => {
     const bookingdata = req.body
     const token = req.cookies.token;
 
-        
-    
-
-
     if (!token) {
         return res.status(401).json({ message: 'No token provided' });
     } 
