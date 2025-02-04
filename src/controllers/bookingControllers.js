@@ -10,19 +10,15 @@ export const getBooking = async (req, res) => {
             ...element,
             BookingTimeIn: new Date(element.BookingTimeIn).toISOString().replace('T', ' ').replace('.000Z', ''),
             BookingTimeOut: new Date(element.BookingTimeOut).toISOString().replace('T', ' ').replace('.000Z', '')
-            
         }));
-        
-      
+
         return res.status(200).json({
             success: true,
-            data: info,
+            data: infoFormat,
             message: "Booking data retrieved successfully",
         });
     } catch (error) {
         console.error("Error fetching bookings:", error);
-
-           
         return res.status(500).json({
             success: false,
             error: error.message,
@@ -54,7 +50,6 @@ export const createBooking = async (req, res) => {
                 timein: currentStart,
                 timeout: currentEnd,
             });
-
         } else {
             // Handle repeating bookings
             while (currentStart <= repeatEndDate) {
@@ -136,7 +131,6 @@ export const deleteBooking = async (req, res) => {
     } catch (error) {
         console.error("Error deleting booking:", error);
         return res.status(500).json({
-
             success: false,
             error: error.message,
             message: "Failed to delete booking due to a server error",
@@ -144,41 +138,38 @@ export const deleteBooking = async (req, res) => {
     }
 };
 
+export const UpdateBooking = async (req, res) => {
+    const bookingdata = req.body;
 
-
-export const UpdateBooking = async (req,res) => {
-    const bookingdata = req.body
-    const token = req.cookies.token;
-
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-    } 
-
-    try{
-
-        const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
+    try {
+        const decodedCookie = verifyToken(req);
         const userId = decodedCookie.id;
+        const checkResult = await bookingModel.checkBookingInfo(bookingdata, bookingdata.idBooking);
+        const selectCheck = await bookingModel.selectCheckBeforeDelete(
+            bookingdata,
+            userId
+        );
 
-        const checkResult = await bookingModel.checkBookingInfo(bookingdata)
-                if(!checkResult){
-                    const data = await bookingModel.updateBookingInfo(bookingdata,userId);
-                    return res.status(200).json({
-                        success: true,
-                        data: data,
-                        massage: 'Update BookingInfo successfully'
-                    }); 
-                }
-                return res.status(500).json({
-                    success: false,
-                    why: "มึงอัพวันซ้ำกับคนอื่นครับ",
-                    message: "User มึงอัพไม่ได้ไอควาย" 
-                })}
-    catch(error){
+
+        if (!checkResult.checkResult&&selectCheck.length>0) {
+            const data = await bookingModel.updateBookingInfo(bookingdata, userId);
+            return res.status(200).json({
+                success: true,
+                data: data,
+                message: 'Update BookingInfo successfully',
+            });
+        }
+        return res.status(400).json({
+            success: false,
+            error: "BOOKING_CONFLICT",
+            message: "Booking conflict. Please choose another time.",
+        });
+    } catch (error) {
         console.error("Error:", error);
         return res.status(500).json({
-          success: false,
-          why: error,
-          message: "Internal server error"
-    })
-}}
-
+            success: false,
+            error: error.message,
+            message: "Internal server error",
+        });
+    }
+};

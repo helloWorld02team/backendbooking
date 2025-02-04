@@ -10,6 +10,7 @@ export const getBookingInfo = async () =>{
 }
 
 
+
 export const createBookingInfo = async (details,userId) =>{ await db.promise().query(
         `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.timein,details.timeout,details.room,userId]
 
@@ -17,21 +18,28 @@ export const createBookingInfo = async (details,userId) =>{ await db.promise().q
     return details
 }
 
-export const checkBookingInfo = async (details) => {
-    const [checkResult] = await db.promise().query(
-        `SELECT EXISTS(
+export const checkBookingInfo = async (details, excludeBookingId = null) => {
+    const query = `
+        SELECT EXISTS(
             SELECT 1 FROM Booking
             WHERE Room_idRoom = ?
               AND (
-                (BookingTimeIn < ? AND BookingTimeOut > ?) OR
-                (BookingTimeIn < ? AND BookingTimeOut > ?) OR
+                (BookingTimeIn <= ? AND BookingTimeOut >= ?) OR
+                (BookingTimeIn <= ? AND BookingTimeOut >= ?) OR
                 (BookingTimeIn >= ? AND BookingTimeOut <= ?)
-                )
-        ) as checkResult;`,
-        [details.room, details.timein, details.timein, details.timeout, details.timeout, details.timein, details.timeout]
-    );
+              )
+              ${excludeBookingId ? 'AND idBooking != ?' : ''}
+        ) as checkResult;
+    `;
+
+    const params = [details.Room_idRoom, details.BookingTimeIn, details.BookingTimeIn, details.BookingTimeOut, details.BookingTimeOut, details.BookingTimeIn, details.BookingTimeOut];
+    if (excludeBookingId) {
+        params.push(excludeBookingId);
+    }
+
+    const [checkResult] = await db.promise().query(query, params);
     return checkResult[0];
-}
+};
 
 export const selectCheckBeforeDelete = async (details,userId) => { 
     const [selectcheck] =
