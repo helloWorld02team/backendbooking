@@ -44,3 +44,8 @@ export const removeBookingInfo = async (details,userId) =>{ await db.promise().q
     `DELETE FROM Booking WHERE idBooking = ? and User_idUser = ?`,[details.idBooking,userId]
 );
 }
+
+export const updateBookingInfo = async (details,userId) =>{ await db.promise().query(
+    `UPDATE Booking SET BookingName = ? , BookingTimeIn = ? ,BookingTimeOut = ? , Room_idRoom = ? WHERE idBooking = ? and User_idUser = ?`,[details.BookingName,details.BookingTimeIn,details.BookingTimeOut,details.Room_idRoom,details.idBooking,userId]
+);
+}
