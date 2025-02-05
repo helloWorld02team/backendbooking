@@ -12,7 +12,7 @@ export const getBookingInfo = async () =>{
 
 
 export const createBookingInfo = async (details,userId) =>{ await db.promise().query(
-        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.timein,details.timeout,details.room,userId]
+        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.BookingTimeIn,details.BookingTimeOut,details.Room_idRoom,userId]
 
     );
     return details
@@ -41,7 +41,8 @@ export const checkBookingInfo = async (details, excludeBookingId = null) => {
     return checkResult[0];
 };
 
-export const selectCheckBeforeDelete = async (details,userId) => { 
+
+export const selectCheckBeforeDelete = async (details,userId) => {
     const [selectcheck] =
     await db.promise().query( `select * from Booking where idBooking = ? and User_idUser = ?;`,[details.idBooking,userId]
 );

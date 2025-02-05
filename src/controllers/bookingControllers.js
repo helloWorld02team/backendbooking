@@ -28,35 +28,37 @@ export const getBooking = async (req, res) => {
 };
 
 export const createBooking = async (req, res) => {
-    const bookingdata = req.body;
+    const bookingData = req.body;
 
     try {
         const decodedCookie = verifyToken(req);
         const userId = decodedCookie.id;
 
-        let currentStart = new Date(bookingdata.timein);
-        let currentEnd = new Date(bookingdata.timeout);
-        const repeatEndDate = bookingdata.repeatEndDate
-            ? new Date(bookingdata.repeatEndDate)
+        let currentStart = new Date(bookingData.BookingTimeIn);
+        let currentEnd = new Date(bookingData.BookingTimeOut);
+        const repeatEndDate = bookingData.repeatEndDate
+            ? new Date(bookingData.repeatEndDate)
             : null;
-        const repeatType = bookingdata.repeatType;
+        const repeatType = bookingData.repeatType;
 
         const bookingOccurrences = [];
+        let createdCount = 0;
 
+        // Generate all occurrences first
         if (!repeatType) {
             // Single booking (no repeat)
             bookingOccurrences.push({
-                ...bookingdata,
-                timein: currentStart,
-                timeout: currentEnd,
+                ...bookingData,
+                BookingTimeIn: currentStart,
+                BookingTimeOut: currentEnd,
             });
         } else {
             // Handle repeating bookings
             while (currentStart <= repeatEndDate) {
                 bookingOccurrences.push({
-                    ...bookingdata,
-                    timein: new Date(currentStart),
-                    timeout: new Date(currentEnd),
+                    ...bookingData,
+                    BookingTimeIn: new Date(currentStart),
+                    BookingTimeOut: new Date(currentEnd),
                 });
 
                 if (repeatType === "weekly") {
@@ -69,14 +71,14 @@ export const createBooking = async (req, res) => {
             }
         }
 
-        // Check all occurrences before inserting
+        // Check all occurrences one by one for conflicts
         for (const occurrence of bookingOccurrences) {
             const checkResult = await bookingModel.checkBookingInfo(occurrence);
             if (checkResult.checkResult) {
                 return res.status(400).json({
                     success: false,
                     error: "BOOKING_CONFLICT",
-                    message: `Booking conflict on ${occurrence.timein}. Please choose another time.`,
+                    message: `Booking conflict on ${occurrence.BookingTimeIn}. Please choose another time.`,
                 });
             }
         }
@@ -84,13 +86,15 @@ export const createBooking = async (req, res) => {
         // Insert all occurrences if no conflicts
         for (const occurrence of bookingOccurrences) {
             await bookingModel.createBookingInfo(occurrence, userId);
+            createdCount++;
         }
 
         return res.status(200).json({
             success: true,
             message: repeatType
-                ? "All repeating bookings created successfully"
+                ? `All ${createdCount} repeating bookings created successfully`
                 : "Single booking created successfully",
+            createdBookings: createdCount,
         });
     } catch (error) {
         console.error("Error creating booking:", error);
