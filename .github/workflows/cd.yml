@@ -1,0 +1,73 @@
+name: Deployment Preview CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  express-deploy:
+    name: Deploy Express Backend
+    runs-on: self-hosted
+    container: alpine
+    timeout-minutes: 10
+    env:
+      REMOTE_SFTP_LOGIN: ${{ secrets.REMOTE_SFTP_LOGIN }}
+      REMOTE_SSH_ARGS: ${{ secrets.REMOTE_SSH_ARGS }}
+      REMOTE_SSH_PASSWORD: ${{ secrets.REMOTE_SSH_PASSWORD }}
+      REMOTE_SFTP_HOST: ${{ secrets.REMOTE_SFTP_HOST }}
+      ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install required tools
+        run: |
+          apk add openssh-client sshpass lftp
+
+      - name: Create directory on server
+        run: |
+          sshpass -p $REMOTE_SSH_PASSWORD ssh $REMOTE_SSH_ARGS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "mkdir -p ~/hippo-backend"
+
+      - name: Set directory permissions
+        run: |
+          sshpass -p $REMOTE_SSH_PASSWORD ssh $REMOTE_SSH_ARGS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+          chmod -R 755 ~/hippo-backend
+          "
+
+      - name: Upload project files to server
+        run: |
+          lftp -d -e "set sftp:auto-confirm yes; set net:timeout 60; set net:max-retries 2; set net:reconnect-interval-base 5; debug 3; open $REMOTE_SFTP_LOGIN; mirror -v --reverse --delete . ~/hippo-backend; bye"
+
+      # - name: Write .env file on server
+      #   run: |
+      #     sshpass -p $REMOTE_SSH_PASSWORD ssh $REMOTE_SSH_ARGS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+      #     echo -e '$ENV_FILE_CONTENT' | base64 -d > ~/hippo-backend/.env &&
+      #     echo '' >> ~/hippo-backend/.env
+      #     "
+      # - name: Write .env file on server
+      #  run: |
+      #    sshpass -p "$REMOTE_SSH_PASSWORD" ssh "$REMOTE_SSH_ARGS" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null << 'EOF'
+      #    cat > ~/hippo-backend/.env <<EOL
+      #    $ENV_FILE_CONTENT
+      #    EOL
+      #    EOF
+
+      - name: Install dependencies on server
+        run: |
+          sshpass -p $REMOTE_SSH_PASSWORD ssh $REMOTE_SSH_ARGS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+          cd ~/hippo-backend &&
+          export NVM_DIR=\$HOME/.nvm &&
+          [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" &&
+          npm ci
+          "
+
+      - name: Start Express Backend
+        run: |
+          sshpass -p $REMOTE_SSH_PASSWORD ssh $REMOTE_SSH_ARGS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+          export NVM_DIR=\$HOME/.nvm &&
+          [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" &&
+          npx pm2 describe backend || npx pm2 stop backend || true &&
+          npx pm2 delete backend || true &&
+          cd ~/hippo-backend && npx pm2 start ~/hippo-backend/index.js --name backend --env production
+          "
