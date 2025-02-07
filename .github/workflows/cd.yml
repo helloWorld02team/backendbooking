@@ -69,5 +69,5 @@ jobs:
           [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" &&
           npx pm2 describe backend || npx pm2 stop backend || true &&
           npx pm2 delete backend || true &&
-          cd ~/hippo-backend && npx pm2 start ~/hippo-backend/index.js --name backend --env production
+          cd ~/hippo-backend && npx pm2 start ~/hippo-backend/src/index.js --name backend --env production
           "
