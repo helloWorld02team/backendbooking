@@ -29,7 +29,7 @@ export const getBooking = async (req, res) => {
 
 export const createBooking = async (req, res) => {
     const bookingData = req.body;
-
+    console.log(bookingData)
     try {
         const decodedCookie = verifyToken(req);
         const userId = decodedCookie.id;
@@ -45,7 +45,8 @@ export const createBooking = async (req, res) => {
         let createdCount = 0;
 
         // Generate all occurrences first
-        if (!repeatType) {
+        console.log(repeatType)
+        if (repeatType == 'none' || repeatType == null || repeatType == undefined ||repeatType == '') {
             // Single booking (no repeat)
             bookingOccurrences.push({
                 ...bookingData,
@@ -88,7 +89,7 @@ export const createBooking = async (req, res) => {
             await bookingModel.createBookingInfo(occurrence, userId);
             createdCount++;
         }
-
+        console.log('success')
         return res.status(200).json({
             success: true,
             message: repeatType
@@ -108,6 +109,7 @@ export const createBooking = async (req, res) => {
 
 export const deleteBooking = async (req, res) => {
     const bookingdata = req.body;
+    console.log(bookingdata)
 
     try {
         const decodedCookie = verifyToken(req);

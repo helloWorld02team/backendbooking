@@ -23,7 +23,7 @@ export const getUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     const { userEmail, userPassword } = req.body;
-
+    console.log(req.cookies)
     const token = req.cookies.token;
     if (token) {
         try {
@@ -56,7 +56,8 @@ export const loginUser = async (req, res) => {
         cookeAuthen.setTokenCookie(res, token); //add cookie to browser
 
         return res.status(200).json({
-            message: 'Login successful'
+            message: 'Login successful',
+            username: user.UserFname+" "+user.UserLname
         });
 
     } catch (error) {
