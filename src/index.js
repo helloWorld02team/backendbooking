@@ -8,10 +8,26 @@ import cors from 'cors'
 const app = express();
 const port = 3001;
 await connectDB()
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://helloworld02.sit.kmutt.ac.th"
+];
+
+app.use(cors({
+    credentials: true,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    }
+}));
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({credentials: true, origin: 'http://localhost:5173'}))
+
 app.use('/api/user',userRoutes)
 app.use("/api/booking",bookingRoute)
 app.use("/api/report",reportRoute)
