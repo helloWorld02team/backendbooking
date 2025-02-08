@@ -16,8 +16,8 @@ export const verifyToken = (req) => {
 
 export const setTokenCookie = (res, token) => {
     res.cookie("token", token, {
-        httpOnly: false,
-        secure: false,
+        httpOnly: true,
+        secure: true,
         sameSite: "none",
         maxAge: 3600000
     });
