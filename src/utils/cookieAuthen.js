@@ -16,9 +16,11 @@ export const verifyToken = (req) => {
 
 export const setTokenCookie = (res, token) => {
     res.cookie("token", token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: false,
-        sameSite: "none",
-        maxAge: 3600000
+        sameSite: "None",
+        path: "/",
+        maxAge: 86400000
     });
 };
+
