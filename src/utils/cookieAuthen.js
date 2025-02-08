@@ -16,8 +16,9 @@ export const verifyToken = (req) => {
 
 export const setTokenCookie = (res, token) => {
     res.cookie("token", token, {
-        secure: process.env.NODE_ENV === "lax", // Enable only in HTTPS
-        sameSite: "lax", // Helps prevent CSRF
-        maxAge: 3600000, // 1 hour
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 3600000
     });
 };
