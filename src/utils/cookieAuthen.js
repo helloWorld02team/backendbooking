@@ -17,7 +17,6 @@ export const verifyToken = (req) => {
 export const setTokenCookie = (res, token) => {
     res.cookie("token", token, {
         httpOnly: false,
-        sameSite: "Lax",
         maxAge: 86400000
     });
 };
