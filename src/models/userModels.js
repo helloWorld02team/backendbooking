@@ -4,6 +4,7 @@ export const getUser = async ()=>{
     const [response] = await db.promise().query(
         `SELECT * FROM User`
     )
+
     return response
 }
 
