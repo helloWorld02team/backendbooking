@@ -75,14 +75,27 @@ export const logoutUser = (req, res) => {
             message: 'You are not currently logged in',
         });
     }
+
     try {
         const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
+
+        // If token is valid, proceed with logout
         res.clearCookie('token');
         console.log(decodedCookie.email, "has logged out");
         return res.status(200).json({
             message: 'Logout successful'
         });
     } catch (error) {
+        // Handle expired token and clear the cookie
+        if (error.name === 'TokenExpiredError') {
+            console.log('Token expired, clearing cookie');
+            res.clearCookie('token');
+            return res.status(401).json({
+                message: 'Token expired. Please log in again.'
+            });
+        }
+
+        // Handle other errors
         console.error('Error during logout:', error.message, error.stack);
         return res.status(500).json({
             message: 'Internal server error',
