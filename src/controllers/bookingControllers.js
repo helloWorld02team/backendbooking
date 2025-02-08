@@ -4,8 +4,8 @@ import { verifyToken } from "../utils/cookieAuthen.js";
 
 export const getBooking = async (req, res) => {
     try {
+        console.log('getBooking requested')
         const info = await bookingModel.getBookingInfo();
-
         const infoFormat = info.map(element => ({
             ...element,
             BookingTimeIn: new Date(element.BookingTimeIn).toISOString().replace('T', ' ').replace('.000Z', ''),

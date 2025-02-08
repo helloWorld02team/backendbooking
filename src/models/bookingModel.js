@@ -2,7 +2,7 @@ import db from '../configs/database.js'
 //เอาแค่ bookingname, start, end
 export const getBookingInfo = async () =>{
     const [info] = await db.promise().query(
-        `SELECT b.idBooking,b.User_idUser, concat(u.UserFname," ",u.UserLname) as Username, b.BookingName, b.Room_idRoom, b.BookingTimeIn, b.BookingTimeOut, b.BookingDuration
+        `SELECT b.idBooking,b.User_idUser, concat(u.UserFname," ",u.UserLname) as Username, b.BookingName, b.Room_idRoom, b.BookingTimeIn, b.BookingTimeOut, b.BookingDuration,b.BookingDescription
         FROM Booking as b join User as u on b.User_idUser = u.idUser`
 
     );
