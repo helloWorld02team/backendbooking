@@ -18,7 +18,7 @@ export const setTokenCookie = (res, token) => {
     res.cookie("token", token, {
         httpOnly: false,
         secure: false,
-        SameSite: "Strict",
+        SameSite: "None",
         path: "/",
         maxAge: 86400000
     });
