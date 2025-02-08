@@ -8,7 +8,7 @@ userRoutes.get("/getalluser",userControllers.getUser);
 
 userRoutes.post("/login",validateLogin,userControllers.loginUser);
 
-userRoutes.get('/protected', userControllers.someProtectedRoute);
+userRoutes.get('/getuserdata', userControllers.getUserData);
 
 userRoutes.post("/logout",userControllers.logoutUser);
 

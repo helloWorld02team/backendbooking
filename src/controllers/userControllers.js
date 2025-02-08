@@ -103,31 +103,33 @@ export const logoutUser = (req, res) => {
     }
 };
 
-export const someProtectedRoute = async (req, res) => {
-    const token = req.cookies.token; // Access token from cookie
 
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
-
+export const getUserData = async (req, res) => {
     try {
-        const decodedCookie = jwt.verify(token, process.env.JWT_SECRET);
-        return res.status(200).json({
-            message: 'Token is valid',
-            access: 'allowed',
-            cred: {
-                id: decodedCookie.id,
-                userFname: decodedCookie.userFname,
-                userLname: decodedCookie.userLname,
-                email: decodedCookie.email
-            },
-        });
+        const token = req.cookies.token; // Access token from cookies
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        try {
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+            return res.status(200).json({
+                username: decodedToken.userFname+" "+decodedToken.userLname,
+                id: decodedToken.id,
+                firstName: decodedToken.userFname,
+                lastName: decodedToken.userLname,
+                email: decodedToken.email
+            });
+        } catch (error) {
+            if (error.name === "TokenExpiredError") {
+                return res.status(401).json({ message: "Token expired", expired: true });
+            }
+            return res.status(401).json({ message: "Invalid token" });
+        }
     } catch (error) {
-        console.error('Error verifying token:', error.message, error.stack);
-        return res.status(401).json({
-            message: 'Invalid token',
-            access: 'denied',
-            dev: error
-        });
+        console.error("Error verifying token:", error);
+        return res.status(401).json({ message: "Authentication failed" });
     }
 };
