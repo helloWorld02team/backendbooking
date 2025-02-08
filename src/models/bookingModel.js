@@ -12,7 +12,8 @@ export const getBookingInfo = async () =>{
 
 
 export const createBookingInfo = async (details,userId) =>{ await db.promise().query(
-        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser) VALUES (?,?,?,?,?)`,[details.name,details.BookingTimeIn,details.BookingTimeOut,details.Room_idRoom,userId]
+        `INSERT INTO Booking (BookingName,BookingTimeIn,BookingTimeOut,Room_idRoom,User_idUser,BookingDescription) VALUES (?,?,?,?,?,?)`,
+    [details.name,details.BookingTimeIn,details.BookingTimeOut,details.Room_idRoom,userId,details.BookingDescription]
 
     );
     return details
