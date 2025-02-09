@@ -29,7 +29,8 @@ export const getBooking = async (req, res) => {
 
 export const createBooking = async (req, res) => {
     const bookingData = req.body;
-    console.log(bookingData)
+    console.log(bookingData);
+
     try {
         const decodedCookie = verifyToken(req);
         const userId = decodedCookie.id;
@@ -41,12 +42,21 @@ export const createBooking = async (req, res) => {
             : null;
         const repeatType = bookingData.repeatType;
 
+        const now = new Date(); // Current date & time
         const bookingOccurrences = [];
         let createdCount = 0;
 
-        // Generate all occurrences first
-        console.log(repeatType)
-        if (repeatType == 'none' || repeatType == null || repeatType == undefined ||repeatType == '') {
+        // Prevent past bookings
+        if (currentStart < now) {
+            return res.status(400).json({
+                success: false,
+                error: "PAST_BOOKING",
+                message: "Cannot create a booking in the past.",
+            });
+        }
+
+        console.log(repeatType);
+        if (!repeatType || repeatType === "none" || repeatType === "") {
             // Single booking (no repeat)
             bookingOccurrences.push({
                 ...bookingData,
@@ -55,12 +65,14 @@ export const createBooking = async (req, res) => {
             });
         } else {
             // Handle repeating bookings
-            while (currentStart <= repeatEndDate) {
-                bookingOccurrences.push({
-                    ...bookingData,
-                    BookingTimeIn: new Date(currentStart),
-                    BookingTimeOut: new Date(currentEnd),
-                });
+            while (currentStart <= repeatEndDate || currentStart.getTime() === repeatEndDate.getTime()) {
+                if (currentStart >= now) {
+                    bookingOccurrences.push({
+                        ...bookingData,
+                        BookingTimeIn: new Date(currentStart),
+                        BookingTimeOut: new Date(currentEnd),
+                    });
+                }
 
                 if (repeatType === "weekly") {
                     currentStart = addWeeks(currentStart, 1);
@@ -72,7 +84,7 @@ export const createBooking = async (req, res) => {
             }
         }
 
-        // Check all occurrences one by one for conflicts
+        // Check all occurrences for conflicts
         for (const occurrence of bookingOccurrences) {
             const checkResult = await bookingModel.checkBookingInfo(occurrence);
             if (checkResult.checkResult) {
@@ -89,10 +101,11 @@ export const createBooking = async (req, res) => {
             await bookingModel.createBookingInfo(occurrence, userId);
             createdCount++;
         }
-        console.log('success')
+
+        console.log("success");
         return res.status(200).json({
             success: true,
-            message: repeatType
+            message: createdCount > 1
                 ? `All ${createdCount} repeating bookings created successfully`
                 : "Single booking created successfully",
             createdBookings: createdCount,
@@ -106,6 +119,7 @@ export const createBooking = async (req, res) => {
         });
     }
 };
+
 
 export const deleteBooking = async (req, res) => {
     const bookingdata = req.body;
