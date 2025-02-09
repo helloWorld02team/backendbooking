@@ -55,7 +55,7 @@ export const createBooking = async (req, res) => {
             });
         } else {
             // Handle repeating bookings
-            while (currentStart <= repeatEndDate || currentStart.getTime() === repeatEndDate.getTime()) {
+            while (currentStart <= repeatEndDate) {
                 bookingOccurrences.push({
                     ...bookingData,
                     BookingTimeIn: new Date(currentStart),

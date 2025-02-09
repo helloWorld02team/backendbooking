@@ -33,13 +33,7 @@ export const checkBookingInfo = async (details, excludeBookingId = null) => {
         ) as checkResult;
     `;
 
-    const params = [
-        details.Room_idRoom,
-        details.BookingTimeIn, details.BookingTimeIn,
-        details.BookingTimeOut, details.BookingTimeOut,
-        details.BookingTimeIn, details.BookingTimeOut
-    ];
-
+    const params = [details.Room_idRoom, details.BookingTimeIn, details.BookingTimeIn, details.BookingTimeOut, details.BookingTimeOut, details.BookingTimeIn, details.BookingTimeOut];
     if (excludeBookingId) {
         params.push(excludeBookingId);
     }
@@ -47,7 +41,6 @@ export const checkBookingInfo = async (details, excludeBookingId = null) => {
     const [checkResult] = await db.promise().query(query, params);
     return checkResult[0];
 };
-
 
 export const selectCheckBeforeDelete = async (details,userId) => {
     const [selectcheck] =
