@@ -131,5 +131,5 @@ export const getUserData = async (req, res) => {
     } catch (error) {
         console.error("Error verifying token:", error);
         return res.status(401).json({ message: "Authentication failed" });
-    }
+    } //fix
 };
