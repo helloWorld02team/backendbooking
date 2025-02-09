@@ -28,12 +28,18 @@ export const checkBookingInfo = async (details, excludeBookingId = null) => {
                 (BookingTimeIn <= ? AND BookingTimeOut >= ?) OR
                 (BookingTimeIn <= ? AND BookingTimeOut >= ?) OR
                 (BookingTimeIn >= ? AND BookingTimeOut <= ?)
-              )
-              ${excludeBookingId ? 'AND idBooking != ?' : ''}
+                )
+            ${excludeBookingId ? 'AND idBooking != ?' : ''}
         ) as checkResult;
     `;
 
-    const params = [details.Room_idRoom, details.BookingTimeIn, details.BookingTimeIn, details.BookingTimeOut, details.BookingTimeOut, details.BookingTimeIn, details.BookingTimeOut];
+    const params = [
+        details.Room_idRoom,
+        details.BookingTimeIn, details.BookingTimeIn,
+        details.BookingTimeOut, details.BookingTimeOut,
+        details.BookingTimeIn, details.BookingTimeOut
+    ];
+
     if (excludeBookingId) {
         params.push(excludeBookingId);
     }
