@@ -1,25 +1,6 @@
 import * as userModels from '../models/userModels.js';
 import * as cookeAuthen from '../utils/cookieAuthen.js';
 import jwt from 'jsonwebtoken';
-import { check, validationResult } from 'express-validator';
-
-export const getUser = async (req, res) => {
-    try {
-        const users = await userModels.getUser();
-        return res.status(200).json({
-            status: 'Success',
-            data: users,
-            message: 'All users retrieved'
-        });
-    } catch (e) {
-        console.error('Error retrieving users:', e);
-        return res.status(500).json({
-            success: false,
-            data: null,
-            message: "Internal server error",
-        });
-    }
-};
 
 export const loginUser = async (req, res) => {
     const { userEmail, userPassword } = req.body;
